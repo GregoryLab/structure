@@ -1,7 +1,7 @@
 #! /usr/bin/python2.7
 
 # old version 6, from /Data05/evlee/pipelines/CSAR_structure_hotspots/CSAR_wrapper_bambased_v6.py. Can remove this line in subsequent versions
-# new version 1.0.1, updates to locations of called scripts (to make consistent with new structure pipeline) and uses distutils spawn to find non-unix standard but server-wide scripts
+# new version 1.0.1, updates the locations of called scripts (to make consistent with new structure pipeline) and uses distutils spawn to find non-unix standard but server-wide scripts
 
 # Note that script makes use of a modified ChIPseqScore function in R that removes the strict requirements for writing CSAR output to the same folder as the CSAR script. The function is coded in the the CSAR R scripts, and a reference copy is also in ChIPseqScore_fixed.R 
 
@@ -110,7 +110,7 @@ datelist = [str(now.year),str(now.month),str(now.day),str(now.hour),str(now.minu
 rightnow= "_".join(datelist)
 dsRNA_BAM_shuffled = args.dsRNA_BAM.replace("bam", rightnow+"_shuffled.bam")
 ssRNA_BAM_shuffled = args.ssRNA_BAM.replace("bam", rightnow+"_shuffled.bam")
-#subprocess.check_call(['perl',scrDir+"/"+'shuffle_reads_BAM.pl', args.dsRNA_BAM, args.ssRNA_BAM, dsRNA_BAM_shuffled, ssRNA_BAM_shuffled])
+subprocess.check_call(['perl',shuffle_reads_BAM, args.dsRNA_BAM, args.ssRNA_BAM, dsRNA_BAM_shuffled, ssRNA_BAM_shuffled])
 
 
 # Calculate genome coverage for shuffled
