@@ -1,6 +1,8 @@
 
+suppressPackageStartupMessages({
 library("CSAR")
 library("gplots")
+})
 
 #fix naming conventions 
 ChIPseqScore = function (control, sample, backg = -1, file = NA, norm = 3 * 10^9, test = "Ratio", times = 1e+06, digits = 2) {

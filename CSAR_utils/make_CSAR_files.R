@@ -1,6 +1,8 @@
 
+suppressPackageStartupMessages({
 library("CSAR")
 library("gplots")
+})
 
 args <- commandArgs(T)
 if (length(args) < 3) {
