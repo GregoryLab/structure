@@ -1,7 +1,9 @@
 #! /usr/bin/python2.7
 
+## VERSION NOTES
 # old version 6, from /Data05/evlee/pipelines/CSAR_structure_hotspots/CSAR_wrapper_bambased_v6.py. Can remove this line in subsequent versions
 # new version 1.0.1, updates the locations of called scripts (to make consistent with new structure pipeline) and uses distutils spawn to find non-unix standard but server-wide scripts
+# version 1.0.2, now runs + and - strand steps in parallel to save time
 
 # Note that script makes use of a modified ChIPseqScore function in R that removes the strict requirements for writing CSAR output to the same folder as the CSAR script. The function is coded in the the CSAR R scripts, and a reference copy is also in ChIPseqScore_fixed.R 
 
@@ -117,24 +119,38 @@ subprocess.check_call(['perl',shuffle_reads_BAM, args.dsRNA_BAM, args.ssRNA_BAM,
 print "Calculating genome coverage for shuffled BAMs"
 for bam in [dsRNA_BAM_shuffled, ssRNA_BAM_shuffled]:
 	tag = basename(bam)
-	tag = tag.replace(".shuffled.bam", "")
+	tag = tag.replace("."+rightnow+"_shuffled.bam", "")
+	#calculate genome coverage
 	plusCov=open(outPrm+'shuffled_'+tag+'.plus.coverage.txt','w')
-	subprocess.check_call([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split','-strand',  '+'], stdout=plusCov)
+	genomeCovPlusPs = subprocess.Popen([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split','-strand',  '+'], stdout=plusCov)
+	minusCov=open(outPrm+'shuffled_'+tag+'.minus.coverage.txt','w')
+	genomeCovMinusPs = subprocess.Popen([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split','-strand',  '-'], stdout=minusCov)
+	genomeCovPlusPs.wait()
+	genomeCovMinusPs.wait()
 	plusCov.close()
-	subprocess.check_call(['perl',split_coverage_by_chrom, outPrm+'shuffled_'+tag+'.plus.coverage.txt', outPrm+'shuffled_'+tag+'.plus'])
+	minusCov.close()
+	#split by chromosome
+	splitPlusPs = subprocess.Popen(['perl',split_coverage_by_chrom, outPrm+'shuffled_'+tag+'.plus.coverage.txt', outPrm+'shuffled_'+tag+'.plus'])
+	splitMinusPs = subprocess.Popen(['perl',split_coverage_by_chrom, outPrm+'shuffled_'+tag+'.minus.coverage.txt', outPrm+'shuffled_'+tag+'.minus'])
+	splitPlusPs.wait()
+	splitMinusPs.wait()
+	#remove initial genome coverage files
 	subprocess.check_call(['rm', outPrm+'shuffled_'+tag+'.plus.coverage.txt'])
-	subprocess.check_call(['ruby', generate_empty_coverage_files, outPrm+'shuffled_'+tag+'.plus', args.chr_len])
-	subprocess.check_call([RSCRIPT, '--vanilla', make_CSAR_files, outPrm, 'shuffled_'+tag+'.plus', 'Forward'])
+	subprocess.check_call(['rm', outPrm+'shuffled_'+tag+'.minus.coverage.txt'])
+	#generate empty coverage files for chromosomes with 0 coverage
+	emptyPlusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outPrm+'shuffled_'+tag+'.plus', args.chr_len])
+	emptyMinusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outPrm+'shuffled_'+tag+'.minus', args.chr_len])
+	emptyPlusPs.wait()
+	emptyMinusPs.wait()
+	#make CSAR input files
+	inputPlusPs = subprocess.Popen([RSCRIPT, '--vanilla', make_CSAR_files, outPrm, 'shuffled_'+tag+'.plus', 'Forward'])
+	inputMinusPs = subprocess.Popen([RSCRIPT, '--vanilla', make_CSAR_files, outPrm, 'shuffled_'+tag+'.minus', 'Reverse'])
+	inputPlusPs.wait()
+	inputMinusPs.wait()
+	#remove split coverage files
 	doneFiles=glob.glob(outPrm+'shuffled_'+tag+'.plus.*.coverage.txt')
 	for target in doneFiles:
 		os.remove(target)
-	minusCov=open(outPrm+'shuffled_'+tag+'.minus.coverage.txt','w')
-	subprocess.check_call([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split','-strand',  '-'], stdout=minusCov)
-	minusCov.close()
-	subprocess.check_call(['perl',split_coverage_by_chrom, outPrm+'shuffled_'+tag+'.minus.coverage.txt', outPrm+'shuffled_'+tag+'.minus'])
-	subprocess.check_call(['rm', outPrm+'shuffled_'+tag+'.minus.coverage.txt'])
-	subprocess.check_call(['ruby', generate_empty_coverage_files, outPrm+'shuffled_'+tag+'.minus', args.chr_len])
-	subprocess.check_call([RSCRIPT, '--vanilla', make_CSAR_files, outPrm, 'shuffled_'+tag+'.minus', 'Reverse'])
 	doneFiles=glob.glob(outPrm+'shuffled_'+tag+'.minus.*.coverage.txt')
 	for target in doneFiles:
 		os.remove(target)
@@ -158,23 +174,37 @@ print "Calculating genome coverage for real BAMs"
 for bam in [args.dsRNA_BAM, args.ssRNA_BAM]:
 	tag = basename(bam)
 	tag = tag.replace(".bam", "")
+	#calculate genome coverage
 	plusCov=open(outDir+tag+'.plus.coverage.txt','w')
-	subprocess.check_call([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split', '-strand', '+'], stdout=plusCov)
+	genomeCovPlusPs = subprocess.Popen([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split','-strand',  '+'], stdout=plusCov)
+	minusCov=open(outDir+tag+'.minus.coverage.txt','w')
+	genomeCovMinusPs = subprocess.Popen([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split','-strand',  '-'], stdout=minusCov)
+	genomeCovPlusPs.wait()
+	genomeCovMinusPs.wait()
 	plusCov.close()
-	subprocess.check_call(['perl',split_coverage_by_chrom, outDir+tag+'.plus.coverage.txt', outDir+tag+'.plus'])
+	minusCov.close()
+	#split by chromosome
+	splitPlusPs = subprocess.Popen(['perl',split_coverage_by_chrom, outDir+tag+'.plus.coverage.txt', outDir+tag+'.plus'])
+	splitMinusPs = subprocess.Popen(['perl',split_coverage_by_chrom, outDir+tag+'.minus.coverage.txt', outDir+tag+'.minus'])
+	splitPlusPs.wait()
+	splitMinusPs.wait()
+	#remove initial genome coverage files
 	subprocess.check_call(['rm', outDir+tag+'.plus.coverage.txt'])
-	subprocess.check_call(['ruby', generate_empty_coverage_files, outDir+tag+'.plus', args.chr_len])
-	subprocess.check_call([RSCRIPT, '--vanilla', make_CSAR_files, outDir, tag+'.plus', 'Forward'])
+	subprocess.check_call(['rm', outDir+tag+'.minus.coverage.txt'])
+	#generate empty coverage files for chromosomes with 0 coverage
+	emptyPlusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outDir+tag+'.plus', args.chr_len])
+	emptyMinusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outDir+tag+'.minus', args.chr_len])
+	emptyPlusPs.wait()
+	emptyMinusPs.wait()
+	#make CSAR input files
+	inputPlusPs = subprocess.Popen([RSCRIPT, '--vanilla', make_CSAR_files, outDir, tag+'.plus', 'Forward'])
+	inputMinusPs = subprocess.Popen([RSCRIPT, '--vanilla', make_CSAR_files, outDir, tag+'.minus', 'Reverse'])
+	inputPlusPs.wait()
+	inputMinusPs.wait()
+	#remove split coverage files
 	doneFiles=glob.glob(outDir+tag+'.plus.*.coverage.txt')
 	for target in doneFiles:
 		os.remove(target)
-	minusCov=open(outDir+tag+'.minus.coverage.txt','w')
-	subprocess.check_call([BEDTOOLS, 'genomecov', '-ibam', bam, '-d', '-split', '-strand', '-'], stdout=minusCov)
-	minusCov.close()
-	subprocess.check_call(['perl',split_coverage_by_chrom, outDir+tag+'.minus.coverage.txt', outDir+tag+'.minus'])
-	subprocess.check_call(['rm', outDir+tag+'.minus.coverage.txt'])
-	subprocess.check_call(['ruby', generate_empty_coverage_files, outDir+tag+'.minus', args.chr_len])
-	subprocess.check_call([RSCRIPT, '--vanilla', make_CSAR_files, outDir, tag+'.minus', 'Reverse'])
 	doneFiles=glob.glob(outDir+tag+'.minus.*.coverage.txt')
 	for target in doneFiles:
 		os.remove(target)
