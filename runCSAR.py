@@ -5,6 +5,8 @@
 # new version 1.0.1, updates the locations of called scripts (to make consistent with new structure pipeline) and uses distutils spawn to find non-unix standard but server-wide scripts
 # version 1.0.2, now runs + and - strand steps in parallel to save time
 # version 1.0.3, now runs ds and ss steps in parallel to save time
+# version 1.1, now allows specification of existing shuffled BAM files
+
 
 # Note that script makes use of a modified ChIPseqScore function in R that removes the strict requirements for writing CSAR output to the same folder as the CSAR script. The function is coded in the the CSAR R scripts, and a reference copy is also in ChIPseqScore_fixed.R 
 
@@ -48,6 +50,8 @@ parser = argparse.ArgumentParser(description="Input dsRNA-seq and ssRNA-seq file
 parser.add_argument('chr_len', help="specify path to chromosome length or contig length file")
 parser.add_argument('--dsRNA_BAM','-ds', action='store', help='dsRNA-seq (i.e. ssRNase-treated) library BAM')
 parser.add_argument('--ssRNA_BAM','-ss', action='store', help='ssRNA-seq (i.e. dsRNase-treated) library BAM')
+parser.add_argument('--shuffled_dsRNA_BAM','-sds', action='store', nargs='?', help='shuffled dsRNA-seq (i.e. ssRNase-treated) library BAM (optional)')
+parser.add_argument('--shuffled_ssRNA_BAM','-sss', action='store', nargs='?', help='shuffled ssRNA-seq (i.e. dsRNase-treated) library BAM (optional)')
 parser.add_argument('--tag','-t', action='store', help='prefix tag for all output files')
 parser.add_argument('--out_dir','-o', help="specify output dir (need path, use trailing '/')")
 #features to add later:
@@ -63,7 +67,6 @@ generate_empty_coverage_files=structure_dir+"/CSAR_utils/"+"generate_empty_cover
 make_CSAR_files=structure_dir+"/CSAR_utils/"+"make_CSAR_files.R"
 run_CSAR_shuffled=structure_dir+"/CSAR_utils/"+"run_CSAR_shuffled.R"
 run_CSAR_saturation=structure_dir+"/CSAR_utils/"+"run_CSAR_saturation.R"
-
 
 
 # generate output directory
@@ -82,30 +85,46 @@ else:
 	outDir=args.out_dir
 	outPrm=args.out_dir+'perms/'
 
+# define unique temp file string
+now = datetime.datetime.now()
+datelist = [str(now.year),str(now.month),str(now.day),str(now.hour),str(now.minute),str(now.second),str(now.microsecond)]
+rightnow= "_".join(datelist)
+
 ## Begin data processing
 
 # Notify user run is begining
 print "Hail CSAR!"
 
-
 # Shuffle BAM files
-print "Shuffling BAM files..."
-now = datetime.datetime.now()
-datelist = [str(now.year),str(now.month),str(now.day),str(now.hour),str(now.minute),str(now.second),str(now.microsecond)]
-rightnow= "_".join(datelist)
-dsRNA_BAM_shuffled = args.dsRNA_BAM.replace("bam", rightnow+"_shuffled.bam")
-ssRNA_BAM_shuffled = args.ssRNA_BAM.replace("bam", rightnow+"_shuffled.bam")
-subprocess.check_call(['perl',shuffle_reads_BAM, args.dsRNA_BAM, args.ssRNA_BAM, dsRNA_BAM_shuffled, ssRNA_BAM_shuffled])
+if not args.shuffled_dsRNA_BAM and not args.shuffled_ssRNA_BAM:
+	print "Shuffling BAM files..."
+	dsRNA_BAM_shuffled = args.dsRNA_BAM.replace("bam", rightnow+"_shuffled.bam")
+	ssRNA_BAM_shuffled = args.ssRNA_BAM.replace("bam", rightnow+"_shuffled.bam")
+	subprocess.check_call(['perl',shuffle_reads_BAM, args.dsRNA_BAM, args.ssRNA_BAM, dsRNA_BAM_shuffled, ssRNA_BAM_shuffled])
+
+elif args.shuffled_dsRNA_BAM and args.shuffled_ssRNA_BAM:
+	print "Using existing shuffled BAM files..."
+	dsRNA_BAM_shuffled = args.shuffled_dsRNA_BAM
+	ssRNA_BAM_shuffled = args.shuffled_ssRNA_BAM
+
+else:
+	raise NameError("Must specify both shuffled_dsRNA_BAM and ssRNA_BAM_shuffled, or specify neither")
+
 
 ####################################################################################################################################################
 
 # Calculate genome coverage for shuffled
 print "Calculating genome coverage for shuffled BAMs"
-
-dsTag = basename(dsRNA_BAM_shuffled)
-dsTag = dsTag.replace("."+rightnow+"_shuffled.bam", "")
-ssTag = basename(ssRNA_BAM_shuffled)
-ssTag = ssTag.replace("."+rightnow+"_shuffled.bam", "")
+if not args.shuffled_dsRNA_BAM and not args.shuffled_ssRNA_BAM:
+	dsTag = basename(dsRNA_BAM_shuffled)
+	dsTag = dsTag.replace("."+rightnow+"_shuffled.bam", "")
+	ssTag = basename(ssRNA_BAM_shuffled)
+	ssTag = ssTag.replace("."+rightnow+"_shuffled.bam", "")
+elif args.shuffled_dsRNA_BAM and args.shuffled_ssRNA_BAM:
+	dsTagFields = basename(dsRNA_BAM_shuffled).split(".")
+	dsTag = ".".join(dsTagFields[:-2])
+	ssTagFields = basename(ssRNA_BAM_shuffled).split(".")
+	ssTag = ".".join(ssTagFields[:-2])
 #calculate genome coverage
 dsPlusCov=open(outPrm+'shuffled_'+dsTag+'.plus.coverage.txt','w')
 dsGenomeCovPlusPs = subprocess.Popen([BEDTOOLS, 'genomecov', '-ibam', dsRNA_BAM_shuffled, '-d', '-split','-strand',  '+'], stdout=dsPlusCov)
