@@ -67,6 +67,7 @@ if BEDGRAPHTOBIGWIG is None:
 parser = argparse.ArgumentParser(description='Calculate basewise structure score over BED intervals using BIGWIG format as an intermediate')
 parser.add_argument('in_ref', help='BED12 reference file')
 parser.add_argument('in_chr', help='Chromosome length reference file') #Consider revising to extract from BAM header
+parser.add_argument ('--multi', help='How to handle coverage of multimappers (w for weight(default), i for ignore multimappings, a for use all mappings, or r for use a random mapping)', default='w')
 parser.add_argument('output_folder',help='name of folder to put structure output')
 parser.add_argument('output_tag', help='output prefix tag, for files written within output folder')
 parser.add_argument('--bam', '-b', action='store', nargs=1, help="mapped reads in BAM format")
@@ -106,15 +107,13 @@ print >> sys.stderr, "making bedgraphs..."
 bgPlus_file = tmpDIR + "tmp_bgP."+rTag+".bgr"
 bgMinus_file = tmpDIR + "tmp_bgM."+rTag+".bgr"
 
-bgPlus_open = open(bgPlus_file,'w')
-bgP = subprocess.Popen([BEDTOOLS, "genomecov",'-ibam',bam,"-g",args.in_chr,"-bg","-strand","+","-split"], stdout=bgPlus_open)
-bgMinus_open = open(bgMinus_file,'w')
-bgM = subprocess.Popen([BEDTOOLS, "genomecov",'-ibam',bam,"-g",args.in_chr,"-bg","-strand","-","-split"], stdout=bgMinus_open)
+bgP = subprocess.Popen(["./BamCoverage",bam, tmpDIR + "tmp_bgP."+rTag+".bgr","-s+t"+args.multi])
+bgM = subprocess.Popen(["./BamCoverage",bam, tmpDIR + "tmp_bgP."+rTag+".bgr", "-s+t"+args.multi])
 
 bgP.wait()
 bgM.wait()
-bgPlus_open.close()
-bgMinus_open.close()
+
+
 
 print >> sys.stderr, "done"
 

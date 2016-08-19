@@ -70,7 +70,7 @@ parser.add_argument('in_ref', help='BED12 reference file')
 parser.add_argument('in_chr', help='Chromosome length reference file') #Consider revising to use standard format, e.g. .dict files from GATK toolkit
 parser.add_argument('output_folder',help='name of folder to put structure output')
 parser.add_argument('output_tag', help='BED6 files with comma seperated list of scores in columns 7+')
-
+parser.add_argument ('--multi', help='How to handle coverage of multimappers (w for weight(default), i for ignore multimappings, a for use all mappings, or r for use a random mapping)', default='w')
 parser.add_argument('--ds_reads', '-ds', action='store', nargs=1, help="dsRNA-seq reads in BAM format, this library was generated using ssRNase (RNaseONE) to isolate dsRNA fragments")
 parser.add_argument('--ss_reads', '-ss', action='store', nargs=1, help="ssRNA-seq reads in BAM format, this library was generated using dsRNase (RNaseV1) to isolate ssRNA fragments")
 args = parser.parse_args()
@@ -165,26 +165,17 @@ DS_bgMinus_file = tmpDIR + "tmp_DS_bgM."+rTag+".bgr"
 SS_bgPlus_file = tmpDIR + "tmp_SS_bgP."+rTag+".bgr"
 SS_bgMinus_file = tmpDIR + "tmp_SS_bgM."+rTag+".bgr"
 
-DS_bgPlus_open = open(DS_bgPlus_file,'w')
-DS_bgP = subprocess.Popen([BEDTOOLS, "genomecov",'-ibam',ds_reads,"-g",args.in_chr,"-bg","-strand","+","-split"], stdout=DS_bgPlus_open)
 
-DS_bgMinus_open = open(DS_bgMinus_file,'w')
-DS_bgM = subprocess.Popen([BEDTOOLS, "genomecov",'-ibam',ds_reads,"-g",args.in_chr,"-bg","-strand","-","-split"], stdout=DS_bgMinus_open)
+DS_bgP =  subprocess.Popen(["./BamCoverage",bam,DS_bgPlus_file,"-s+t"+args.multi])
+DS_bgM = subprocess.Popen(["./BamCoverage",bam,DS_bgMinus_file,"-s+t"+args.multi])
+SS_bgP = subprocess.Popen(["./BamCoverage",bam,SS_bgPlus_file,"-s+t"+args.multi])
+SS_bgM = subprocess.Popen(["./BamCoverage",bam,SS_bgMinus_file,"-s+t"+args.multi])
 
-SS_bgPlus_open = open(SS_bgPlus_file,'w')
-SS_bgP = subprocess.Popen([BEDTOOLS, "genomecov",'-ibam',ss_reads,"-g",args.in_chr,"-bg","-strand","+","-split"], stdout=SS_bgPlus_open)
-
-SS_bgMinus_open = open(SS_bgMinus_file,'w')
-SS_bgM = subprocess.Popen([BEDTOOLS, "genomecov",'-ibam',ss_reads,"-g",args.in_chr,"-bg","-strand","-","-split"], stdout=SS_bgMinus_open)
 
 DS_bgP.wait()
 DS_bgM.wait()
 SS_bgP.wait()
 SS_bgM.wait()
-DS_bgPlus_open.close()
-DS_bgMinus_open.close()
-SS_bgPlus_open.close()
-SS_bgMinus_open.close()
 
 print >> sys.stderr, "done"
 
