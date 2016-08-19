@@ -107,8 +107,8 @@ print >> sys.stderr, "making bedgraphs..."
 bgPlus_file = tmpDIR + "tmp_bgP."+rTag+".bgr"
 bgMinus_file = tmpDIR + "tmp_bgM."+rTag+".bgr"
 
-bgP = subprocess.Popen(["./BamCoverage",bam, tmpDIR + "tmp_bgP."+rTag+".bgr","-s+t"+args.multi])
-bgM = subprocess.Popen(["./BamCoverage",bam, tmpDIR + "tmp_bgP."+rTag+".bgr", "-s+t"+args.multi])
+bgP = subprocess.Popen(["/Data05/azachary/BamCoverage",bam, tmpDIR + "tmp_bgP."+rTag+".bgr","-s+t"+args.multi])
+bgM = subprocess.Popen(["/Data05/azachary/BamCoverage",bam, tmpDIR + "tmp_bgP."+rTag+".bgr", "-s+t"+args.multi])
 
 bgP.wait()
 bgM.wait()
