@@ -212,7 +212,7 @@ ssTag = ssTag.replace(".bam", "")
 #calculate genome coverage
 script_dir = os.path.dirname(os.path.realpath(__file__))
 dsGenomeCovPlusPs = subprocess.Popen([script_dir+"/BamCoverage", args.dsRNA_BAM, outDir+dsTag+'.plus.coverage.txt',"-s+th"+args.multi])
-dsGenomeCovMinusPs = subprocess.Popen([script_dir+"/BamCoverage", args.dsRNA_BAM, outDir+dsTag+'.minus.coverage.txt',"-s-t"h+args.multi])
+dsGenomeCovMinusPs = subprocess.Popen([script_dir+"/BamCoverage", args.dsRNA_BAM, outDir+dsTag+'.minus.coverage.txt',"-s-th"+args.multi])
 ssGenomeCovMinusPs = subprocess.Popen([script_dir+"/BamCoverage", args.ssRNA_BAM, outDir+ssTag+'.minus.coverage.txt',"-s-th"+args.multi])
 ssGenomeCovPlusPs =subprocess.Popen([script_dir+"/BamCoverage", args.ssRNA_BAM, outDir+ssTag+'.plus.coverage.txt',"-s+th"+args.multi])
 
