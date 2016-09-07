@@ -68,7 +68,7 @@ generate_empty_coverage_files=structure_dir+"/CSAR_utils/"+"generate_empty_cover
 make_CSAR_files=structure_dir+"/CSAR_utils/"+"make_CSAR_files.R"
 run_CSAR_shuffled=structure_dir+"/CSAR_utils/"+"run_CSAR_shuffled.R"
 run_CSAR_saturation=structure_dir+"/CSAR_utils/"+"run_CSAR_saturation.R"
-
+BamCoverage=structure_dir+"/"+"BamCoverage"
 
 # generate output directory
 if not args.out_dir:
@@ -127,10 +127,10 @@ elif args.shuffled_dsRNA_BAM and args.shuffled_ssRNA_BAM:
 	ssTagFields = basename(ssRNA_BAM_shuffled).split(".")
 	ssTag = ".".join(ssTagFields[:-2])
 #calculate genome coverage
-dsGenomeCovPlusPs = subprocess.Popen(["/Data05/azachary/BamCoverage", dsRNA_BAM_shuffled, outPrm+'shuffled_'+dsTag+'.plus.coverage.txt',"-s+t"+args.multi])
-dsGenomeCovMinusPs = subprocess.Popen(["/Data05/azachary/BamCoverage", dsRNA_BAM_shuffled, outPrm+'shuffled_'+dsTag+'.minus.coverage.txt',"-s-t"+args.multi])
-ssGenomeCovMinusPs = subprocess.Popen(["/Data05/azachary/BamCoverage", ssRNA_BAM_shuffled, outPrm+'shuffled_'+ssTag+'.minus.coverage.txt',"-s-t"+args.multi])
-ssGenomeCovPlusPs =subprocess.Popen(["/Data05/azachary/BamCoverage", ssRNA_BAM_shuffled, outPrm+'shuffled_'+ssTag+'.plus.coverage.txt',"-s+t"+args.multi])
+dsGenomeCovPlusPs = subprocess.Popen([BamCoverage, dsRNA_BAM_shuffled, outPrm+'shuffled_'+dsTag+'.plus.coverage.txt',"-s+t"+args.multi])
+dsGenomeCovMinusPs = subprocess.Popen([BamCoverage, dsRNA_BAM_shuffled, outPrm+'shuffled_'+dsTag+'.minus.coverage.txt',"-s-t"+args.multi])
+ssGenomeCovMinusPs = subprocess.Popen([BamCoverage, ssRNA_BAM_shuffled, outPrm+'shuffled_'+ssTag+'.minus.coverage.txt',"-s-t"+args.multi])
+ssGenomeCovPlusPs =subprocess.Popen([BamCoverage, ssRNA_BAM_shuffled, outPrm+'shuffled_'+ssTag+'.plus.coverage.txt',"-s+t"+args.multi])
 
 
 
@@ -209,10 +209,10 @@ ssTag = basename(args.ssRNA_BAM)
 ssTag = ssTag.replace(".bam", "")
 #calculate genome coverage
 
-dsGenomeCovPlusPs = subprocess.Popen(["/Data05/azachary/BamCoverage", args.dsRNA_BAM, outDir+dsTag+'.plus.coverage.txt',"-s+t"+args.multi])
-dsGenomeCovMinusPs = subprocess.Popen(["/Data05/azachary/BamCoverage", args.dsRNA_BAM, outDir+dsTag+'.minus.coverage.txt',"-s-t"+args.multi])
-ssGenomeCovMinusPs = subprocess.Popen(["/Data05/azachary/BamCoverage", args.ssRNA_BAM, outDir+ssTag+'.minus.coverage.txt',"-s-t"+args.multi])
-ssGenomeCovPlusPs =subprocess.Popen(["/Data05/azachary/BamCoverage", args.ssRNA_BAM, outDir+ssTag+'.plus.coverage.txt',"-s+t"+args.multi])
+dsGenomeCovPlusPs = subprocess.Popen([BamCoverage, args.dsRNA_BAM, outDir+dsTag+'.plus.coverage.txt',"-s+t"+args.multi])
+dsGenomeCovMinusPs = subprocess.Popen([BamCoverage, args.dsRNA_BAM, outDir+dsTag+'.minus.coverage.txt',"-s-t"+args.multi])
+ssGenomeCovMinusPs = subprocess.Popen([BamCoverage, args.ssRNA_BAM, outDir+ssTag+'.minus.coverage.txt',"-s-t"+args.multi])
+ssGenomeCovPlusPs =subprocess.Popen([BamCoverage, args.ssRNA_BAM, outDir+ssTag+'.plus.coverage.txt',"-s+t"+args.multi])
 
 
 

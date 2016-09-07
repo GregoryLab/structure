@@ -42,7 +42,7 @@ if sys.hexversion < 0x020700F0:
     sys.exit("***ERROR: Must be using Python 2.7.x (recommended) or above")
 
 
-#find subprocess scripts that aren't standard in unix environement
+#find subprocess scripts that aren't standard in unix environment
 BWTOOL=spawn.find_executable("bwtool")
 if BWTOOL is None:
    print "***ERROR: bwtool is not found"
@@ -62,6 +62,10 @@ BEDGRAPHTOBIGWIG=spawn.find_executable("bedGraphToBigWig")
 if BEDGRAPHTOBIGWIG is None:
    print  "***ERROR: bedGraphToBigWig is not found"
    sys.exit("Please install bedGraphToBigWig or make sure it is in the PATH")
+
+#locations of other subprocess scripts that arent present in default PATH
+structure_dir=os.path.dirname(os.path.realpath(sys.argv[0]))
+BamCoverage=structure_dir+"/"+"BamCoverage"
 
 
 #command line arguments
@@ -166,10 +170,10 @@ SS_bgPlus_file = tmpDIR + "tmp_SS_bgP."+rTag+".bgr"
 SS_bgMinus_file = tmpDIR + "tmp_SS_bgM."+rTag+".bgr"
 
 
-DS_bgP =  subprocess.Popen(["/Data05/azachary/BamCoverage",ds_reads,DS_bgPlus_file,"-s+t"+args.multi])
-DS_bgM = subprocess.Popen(["/Data05/azachary/BamCoverage",ds_reads,DS_bgMinus_file,"-s+t"+args.multi])
-SS_bgP = subprocess.Popen(["/Data05/azachary/BamCoverage",ss_reads,SS_bgPlus_file,"-s+t"+args.multi])
-SS_bgM = subprocess.Popen(["/Data05/azachary/BamCoverage",ss_reads,SS_bgMinus_file,"-s+t"+args.multi])
+DS_bgP =  subprocess.Popen([BamCoverage, ds_reads,DS_bgPlus_file,"-s+t"+args.multi])
+DS_bgM = subprocess.Popen([BamCoverage, ds_reads,DS_bgMinus_file,"-s+t"+args.multi])
+SS_bgP = subprocess.Popen([BamCoverage, ss_reads,SS_bgPlus_file,"-s+t"+args.multi])
+SS_bgM = subprocess.Popen([BamCoverage, ss_reads,SS_bgMinus_file,"-s+t"+args.multi])
 
 
 DS_bgP.wait()
