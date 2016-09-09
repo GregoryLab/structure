@@ -62,6 +62,7 @@ if BEDGRAPHTOBIGWIG is None:
    print  "***ERROR: bedGraphToBigWig is not found"
    sys.exit("Please install bedGraphToBigWig or make sure it is in the PATH")
 
+
 #locations of other subprocess scripts that arent present in default PATH
 structure_dir=os.path.dirname(os.path.realpath(sys.argv[0]))
 BamCoverage=structure_dir+"/"+"BamCoverage"
@@ -110,8 +111,9 @@ print >> sys.stderr, "making bedgraphs..."
 bgPlus_file = tmpDIR + "tmp_bgP."+rTag+".bgr"
 bgMinus_file = tmpDIR + "tmp_bgM."+rTag+".bgr"
 
-bgP = subprocess.Popen([BamCoverage,bam, tmpDIR + "tmp_bgP."+rTag+".bgr","-s+t"+args.multi])
-bgM = subprocess.Popen([BamCoverage,bam, tmpDIR + "tmp_bgP."+rTag+".bgr", "-s+t"+args.multi])
+script_dir = os.path.dirname(os.path.realpath(__file__))
+bgP = subprocess.Popen([BamCoverage ,bam, tmpDIR + "tmp_bgP."+rTag+".bgr","-s+th"+args.multi])
+bgM = subprocess.Popen([BamCoverage ,bam, tmpDIR + "tmp_bgP."+rTag+".bgr", "-s+th"+args.multi])
 
 bgP.wait()
 bgM.wait()
