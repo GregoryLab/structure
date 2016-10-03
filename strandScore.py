@@ -113,7 +113,7 @@ bgMinus_file = tmpDIR + "tmp_bgM."+rTag+".bgr"
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 bgP = subprocess.Popen([BamCoverage ,bam, tmpDIR + "tmp_bgP."+rTag+".bgr","-s+th"+args.multi])
-bgM = subprocess.Popen([BamCoverage ,bam, tmpDIR + "tmp_bgP."+rTag+".bgr", "-s+th"+args.multi])
+bgM = subprocess.Popen([BamCoverage ,bam, tmpDIR + "tmp_bgP."+rTag+".bgr", "-s-th"+args.multi])
 
 bgP.wait()
 bgM.wait()
