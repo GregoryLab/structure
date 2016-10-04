@@ -168,9 +168,9 @@ SS_bgMinus_file = tmpDIR + "tmp_SS_bgM."+rTag+".bgr"
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 DS_bgP =  subprocess.Popen([script_dir+"/BamCoverage",ds_reads,DS_bgPlus_file,"-s+th"+args.multi])
-DS_bgM = subprocess.Popen([script_dir+"/BamCoverage",ds_reads,DS_bgMinus_file,"-s+th"+args.multi])
+DS_bgM = subprocess.Popen([script_dir+"/BamCoverage",ds_reads,DS_bgMinus_file,"-s-th"+args.multi])
 SS_bgP = subprocess.Popen([script_dir+"/BamCoverage",ss_reads,SS_bgPlus_file,"-s+th"+args.multi])
-SS_bgM = subprocess.Popen([script_dir+"/BamCoverage",ss_reads,SS_bgMinus_file,"-s+th"+args.multi])
+SS_bgM = subprocess.Popen([script_dir+"/BamCoverage",ss_reads,SS_bgMinus_file,"-s-th"+args.multi])
 
 
 DS_bgP.wait()
