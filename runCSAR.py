@@ -6,6 +6,7 @@
 # version 1.0.2, now runs + and - strand steps in parallel to save time
 # version 1.0.3, now runs ds and ss steps in parallel to save time
 # version 1.1, now allows specification of existing shuffled BAM files
+# version 1.2, now includes option to retain intermediate files
 
 
 # Note that script makes use of a modified ChIPseqScore function in R that removes the strict requirements for writing CSAR output to the same folder as the CSAR script. The function is coded in the the CSAR R scripts, and a reference copy is also in ChIPseqScore_fixed.R 
@@ -55,6 +56,7 @@ parser.add_argument('--shuffled_ssRNA_BAM','-sss', action='store', nargs='?', he
 parser.add_argument ('--multi', help='How to handle coverage of multimappers (w for weight(default), i for ignore multimappings, a for use all mappings, or r for use a random mapping)', default='w')
 parser.add_argument('--tag','-t', action='store', help='prefix tag for all output files')
 parser.add_argument('--out_dir','-o', help="specify output dir (need path, use trailing '/')")
+parser.add_argument('--keep_intermediates','-k',action='store_true',help='Retain intermediate files. Useful for debugging.')
 #features to add later:
 #parser.add_argument('--filter_in','-fi', action='store', nargs='?', default='unspecified', help="input file to retain reads in specified regions, should be .bed file of desired regions")
 #parser.add_argument('--filter_out','-fo', action='store', nargs='?', default='unspecified', help="input file to filter out reads in specified regions, should be .bed file of unwanted regions")
@@ -173,28 +175,30 @@ dsInputMinusPs.wait()
 ssInputPlusPs.wait()
 ssInputMinusPs.wait()
 #remove split coverage files
-doneFiles=glob.glob(outPrm+'shuffled_'+dsTag+'.plus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outPrm+'shuffled_'+dsTag+'.minus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outPrm+'shuffled_'+ssTag+'.plus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outPrm+'shuffled_'+ssTag+'.minus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
+if not args.keep_intermediates:
+	doneFiles=glob.glob(outPrm+'shuffled_'+dsTag+'.plus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outPrm+'shuffled_'+dsTag+'.minus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outPrm+'shuffled_'+ssTag+'.plus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outPrm+'shuffled_'+ssTag+'.minus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
 
 # Run CSAR shuffled
 print "Running CSAR for shuffled BAMs..."
 subprocess.check_call([RSCRIPT, '--vanilla', run_CSAR_shuffled, outPrm+'shuffled_'+dsTag, outPrm+'shuffled_'+ssTag, outPrm+'shuffled_'+args.tag, args.chr_len, outPrm+'shuffled_'+args.tag+'.CSAR.bed', outPrm+'shuffled_'+args.tag+'.CSAR.threshold.txt'])
-doneFiles=glob.glob(outPrm+'*CSARNhits')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outPrm+'*CSARScore')
-for target in doneFiles:
-	os.remove(target)
+if not args.keep_intermediates:
+	doneFiles=glob.glob(outPrm+'*CSARNhits')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outPrm+'*CSARScore')
+	for target in doneFiles:
+		os.remove(target)
 
 ####################################################################################################################################################
 
@@ -251,18 +255,19 @@ dsInputMinusPs.wait()
 ssInputPlusPs.wait()
 ssInputMinusPs.wait()
 #remove split coverage files
-doneFiles=glob.glob(outDir+dsTag+'.plus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outDir+dsTag+'.minus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outDir+ssTag+'.plus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outDir+ssTag+'.minus.*.coverage.txt')
-for target in doneFiles:
-	os.remove(target)
+if not args.keep_intermediates:
+	doneFiles=glob.glob(outDir+dsTag+'.plus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outDir+dsTag+'.minus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outDir+ssTag+'.plus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outDir+ssTag+'.minus.*.coverage.txt')
+	for target in doneFiles:
+		os.remove(target)
 
 # Run CSAR on true data
 dsTag = basename(args.dsRNA_BAM)
@@ -272,12 +277,13 @@ ssTag = ssTag.replace(".bam", "")
 short_ds_tag = dsTag.split(".")[0]
 short_ss_tag = ssTag.split(".")[0]
 subprocess.check_call([RSCRIPT, '--vanilla', run_CSAR_saturation, outDir+dsTag, outDir+ssTag, outDir+args.tag, args.chr_len, outPrm+'shuffled_'+args.tag+'.CSAR.threshold.txt', outDir+short_ds_tag+"_enrichedOver_"+short_ss_tag+'.CSAR_peaks.bed', outDir+short_ds_tag+"_enrichedOver_"+short_ss_tag+'.CSAR_peaks_counts.txt'])
-doneFiles=glob.glob(outDir+'*CSARNhits')
-for target in doneFiles:
-	os.remove(target)
-doneFiles=glob.glob(outDir+'*CSARScore')
-for target in doneFiles:
-	os.remove(target)
+if not args.keep_intermediates:
+	doneFiles=glob.glob(outDir+'*CSARNhits')
+	for target in doneFiles:
+		os.remove(target)
+	doneFiles=glob.glob(outDir+'*CSARScore')
+	for target in doneFiles:
+		os.remove(target)
 
 ####################################################################################################################################################
 
