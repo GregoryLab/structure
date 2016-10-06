@@ -7,6 +7,7 @@
 # version 1.0.3, now runs ds and ss steps in parallel to save time
 # version 1.1, now allows specification of existing shuffled BAM files
 # version 1.2, now includes option to retain intermediate files
+# version 1.2.1, bugfix to retain intermediate files function
 
 
 # Note that script makes use of a modified ChIPseqScore function in R that removes the strict requirements for writing CSAR output to the same folder as the CSAR script. The function is coded in the the CSAR R scripts, and a reference copy is also in ChIPseqScore_fixed.R 
@@ -152,10 +153,11 @@ dsSplitMinusPs.wait()
 ssSplitPlusPs.wait()
 ssSplitMinusPs.wait()
 #remove initial genome coverage files
-subprocess.check_call(['rm', outPrm+'shuffled_'+dsTag+'.plus.coverage.txt'])
-subprocess.check_call(['rm', outPrm+'shuffled_'+dsTag+'.minus.coverage.txt'])
-subprocess.check_call(['rm', outPrm+'shuffled_'+ssTag+'.plus.coverage.txt'])
-subprocess.check_call(['rm', outPrm+'shuffled_'+ssTag+'.minus.coverage.txt'])
+if not args.keep_intermediates:
+	subprocess.check_call(['rm', outPrm+'shuffled_'+dsTag+'.plus.coverage.txt'])
+	subprocess.check_call(['rm', outPrm+'shuffled_'+dsTag+'.minus.coverage.txt'])
+	subprocess.check_call(['rm', outPrm+'shuffled_'+ssTag+'.plus.coverage.txt'])
+	subprocess.check_call(['rm', outPrm+'shuffled_'+ssTag+'.minus.coverage.txt'])
 #generate empty coverage files for chromosomes with 0 coverage
 dsEmptyPlusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outPrm+'shuffled_'+dsTag+'.plus', args.chr_len])
 dsEmptyMinusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outPrm+'shuffled_'+dsTag+'.minus', args.chr_len])
@@ -232,10 +234,11 @@ dsSplitMinusPs.wait()
 ssSplitPlusPs.wait()
 ssSplitMinusPs.wait()
 #remove initial genome coverage files
-subprocess.check_call(['rm', outDir+dsTag+'.plus.coverage.txt'])
-subprocess.check_call(['rm', outDir+dsTag+'.minus.coverage.txt'])
-subprocess.check_call(['rm', outDir+ssTag+'.plus.coverage.txt'])
-subprocess.check_call(['rm', outDir+ssTag+'.minus.coverage.txt'])
+if not args.keep_intermediates:
+	subprocess.check_call(['rm', outDir+dsTag+'.plus.coverage.txt'])
+	subprocess.check_call(['rm', outDir+dsTag+'.minus.coverage.txt'])
+	subprocess.check_call(['rm', outDir+ssTag+'.plus.coverage.txt'])
+	subprocess.check_call(['rm', outDir+ssTag+'.minus.coverage.txt'])
 #generate empty coverage files for chromosomes with 0 coverage
 dsEmptyPlusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outDir+dsTag+'.plus', args.chr_len])
 dsEmptyMinusPs = subprocess.Popen(['ruby', generate_empty_coverage_files, outDir+dsTag+'.minus', args.chr_len])
