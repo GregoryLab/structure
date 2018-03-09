@@ -148,7 +148,7 @@ SC_paste.wait()
 print >> sys.stderr, "done"
 
 
-# Calculate structure scores genome wide
+# Calculate strand scores genome wide (copied from structure score pipeline)
 def glog2(x):
 	y = x + math.sqrt( 1 + (x*x) )
 	return math.log(y,2)
