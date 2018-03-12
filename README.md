@@ -82,7 +82,7 @@ python strandScore.py --bam [bam] [in_ref] [in_chr] [output_folder] [output_tag]
 		(w for weight(default), i for ignore multimappings, a for use all mappings, or r for use a random mapping)
 
 
-###3. runCSAR.py
+### 3. runCSAR.py
 
 ```
 runCSAR.py --dsRNA_BAM [dsRNA_BAM] --ssRNA_BAM [ssRNA_BAM] [chr_len] [OPTIONS]
