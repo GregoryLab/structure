@@ -30,7 +30,7 @@ Generate label-shuffled (permuted) datasets in which dsRNA and ssRNA libraries r
 
 ## Usage
 
-###1. structScore.py
+### 1. structScore.py
 
 ```
 python structScore.py --ds_reads [ds_reads] --ss_reads [ss_reads] [in_ref] [in_chr] [output_folder] [output_tag] [OPTIONS]
